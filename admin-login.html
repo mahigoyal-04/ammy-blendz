@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Admin Login | Ammy Blendz</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0b0b0b;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+        }
+
+        .login-box {
+            width: 100%;
+            max-width: 420px;
+            margin: 20px;
+            padding: 40px;
+            background: #151515;
+            border: 1px solid #2d2d2d;
+            border-radius: 14px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 3px;
+            color: #d4af37;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #999;
+            margin-bottom: 35px;
+            font-size: 14px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: #ccc;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 20px;
+            background: #0d0d0d;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #d4af37;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background: #d4af37;
+            color: #111;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #e5c04b;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        #errorMessage {
+            display: none;
+            margin-top: 18px;
+            padding: 12px;
+            border-radius: 8px;
+            background: #2a1515;
+            border: 1px solid #6b2929;
+            color: #ff8f8f;
+            font-size: 13px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-box">
+
+        <div class="logo">AMMY BLENDZ</div>
+
+        <div class="subtitle">
+            Admin Dashboard
+        </div>
+
+        <form id="loginForm">
+
+            <label for="email">Email</label>
+
+            <input
+                type="email"
+                id="email"
+                value="iamaayush1313@gmail.com"
+                required
+            >
+
+            <label for="password">Password</label>
+
+            <input
+                type="password"
+                id="password"
+                placeholder="Enter your password"
+                required
+            >
+
+            <button type="submit" id="loginButton">
+                LOGIN
+            </button>
+
+        </form>
+
+        <div id="errorMessage"></div>
+
+    </div>
+
+    <script>
+
+        const supabaseUrl =
+            "https://kmhuytrqygpskmvcyimd.supabase.co";
+
+        const supabaseKey =
+            "sb_publishable_rTnXNzLaXZ0hPGhsQJfT2Q_o9bCY0bN";
+
+        const supabaseClient =
+            window.supabase.createClient(
+                supabaseUrl,
+                supabaseKey
+            );
+
+
+        const loginForm =
+            document.getElementById("loginForm");
+
+        const loginButton =
+            document.getElementById("loginButton");
+
+        const errorMessage =
+            document.getElementById("errorMessage");
+
+
+        loginForm.addEventListener("submit", async function(event) {
+
+            event.preventDefault();
+
+            errorMessage.style.display = "none";
+
+            loginButton.disabled = true;
+            loginButton.textContent = "LOGGING IN...";
+
+
+            const email =
+                document.getElementById("email").value.trim();
+
+            const password =
+                document.getElementById("password").value;
+
+
+            try {
+
+                const { data, error } =
+                    await supabaseClient.auth.signInWithPassword({
+                        email: email,
+                        password: password
+                    });
+
+
+                if (error) {
+
+                    errorMessage.textContent =
+                        error.message;
+
+                    errorMessage.style.display = "block";
+
+                    loginButton.disabled = false;
+                    loginButton.textContent = "LOGIN";
+
+                    return;
+                }
+
+
+                if (data && data.session) {
+
+                    window.location.replace("admin.html");
+
+                    return;
+                }
+
+
+                errorMessage.textContent =
+                    "Login was successful, but no session was created.";
+
+                errorMessage.style.display = "block";
+
+                loginButton.disabled = false;
+                loginButton.textContent = "LOGIN";
+
+
+            } catch (err) {
+
+                errorMessage.textContent =
+                    err.message || "Something went wrong. Please try again.";
+
+                errorMessage.style.display = "block";
+
+                loginButton.disabled = false;
+                loginButton.textContent = "LOGIN";
+            }
+
+        });
+
+    </script>
+
+</body>
+</html>

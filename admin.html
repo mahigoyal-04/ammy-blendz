@@ -1,0 +1,3856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Ammy Blendz | Admin Dashboard</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    background:#0b0b0b;
+    color:#fff;
+    font-family:Arial,sans-serif;
+    min-height:100vh;
+}
+
+header{
+    padding:20px 30px;
+    border-bottom:1px solid #292929;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.logo{
+    font-size:22px;
+    font-weight:bold;
+    letter-spacing:2px;
+}
+
+.logo span{
+    color:#d4af37;
+}
+
+#logoutBtn{
+    background:transparent;
+    color:#d4af37;
+    border:1px solid #d4af37;
+    padding:9px 16px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+main{
+    max-width:1500px;
+    margin:35px auto;
+    padding:0 20px;
+}
+
+h1{
+    margin-bottom:8px;
+}
+
+.subtitle{
+    color:#888;
+    margin-bottom:25px;
+}
+
+
+/* =========================
+   STATS
+========================= */
+
+.stats-grid{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:15px;
+    margin-bottom:25px;
+}
+
+.stat-card{
+    background:#151515;
+    border:1px solid #292929;
+    border-radius:12px;
+    padding:22px;
+}
+
+.stat-title{
+    color:#888;
+    font-size:13px;
+    text-transform:uppercase;
+    margin-bottom:10px;
+}
+
+.stat-value{
+    color:#d4af37;
+    font-size:30px;
+    font-weight:bold;
+}
+
+
+/* =========================
+   PANELS
+========================= */
+
+.panel{
+    background:#151515;
+    border:1px solid #292929;
+    border-radius:12px;
+    padding:25px;
+    margin-bottom:25px;
+}
+
+.panel h2{
+    margin-bottom:20px;
+    font-size:20px;
+}
+
+
+/* =========================
+   ADD AVAILABILITY
+========================= */
+
+.controls{
+    display:grid;
+    grid-template-columns:1fr 1fr 1fr 1.5fr auto auto;
+    gap:12px;
+}
+
+input,
+select{
+    width:100%;
+    padding:13px;
+    background:#0d0d0d;
+    color:#fff;
+    border:1px solid #444;
+    border-radius:6px;
+}
+
+button{
+    padding:13px 18px;
+    border:none;
+    border-radius:6px;
+    background:#d4af37;
+    color:#111;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:hover{
+    opacity:.9;
+}
+
+#message{
+    margin-top:15px;
+    color:#d4af37;
+}
+
+
+/* =========================
+   APPOINTMENT TABLE
+========================= */
+
+.table-wrap{
+    width:100%;
+    overflow-x:auto;
+    border:1px solid #292929;
+    border-radius:8px;
+}
+
+.appointment-table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:1000px;
+}
+
+.appointment-table th,
+.appointment-table td{
+    padding:13px 12px;
+    border-bottom:1px solid #292929;
+    text-align:left;
+    white-space:nowrap;
+}
+
+.appointment-table th{
+    background:#202020;
+    color:#d4af37;
+    font-size:12px;
+    text-transform:uppercase;
+}
+
+.appointment-table td{
+    background:#101010;
+    font-size:13px;
+}
+
+.customer-name{
+    font-weight:bold;
+    color:#fff;
+}
+
+.customer-phone{
+    color:#999;
+    font-size:12px;
+    margin-top:4px;
+}
+
+.notes-cell{
+    max-width:220px;
+    white-space:normal !important;
+    color:#aaa;
+}
+
+.status-badge{
+    display:inline-block;
+    padding:5px 9px;
+    border-radius:20px;
+    font-size:11px;
+    font-weight:bold;
+}
+
+.status-pending{
+    background:#5d4d16;
+    color:#d4af37;
+}
+
+.status-confirmed{
+    background:#173d24;
+    color:#62c174;
+}
+
+.status-rejected{
+    background:#4a2020;
+    color:#e57373;
+}
+
+.status-past{
+    background:#444;
+    color:#ddd;
+}
+
+.action-buttons{
+    display:flex;
+    gap:7px;
+}
+
+.confirm-btn{
+    background:#62c174;
+}
+
+.reject-btn{
+    background:#e57373;
+}
+
+.delete-btn{
+    background:#e57373;
+    color:#fff;
+}
+
+.no-action{
+    color:#666;
+    font-size:12px;
+}
+
+.empty{
+    color:#777;
+    padding:15px 0;
+}
+
+
+/* =========================
+   SLOT GRID
+========================= */
+
+.slot-grid-wrap{
+    width:100%;
+    overflow:auto;
+    border:1px solid #292929;
+    border-radius:8px;
+}
+
+.slot-grid{
+    width:max-content;
+    min-width:100%;
+    border-collapse:collapse;
+}
+
+.slot-grid th,
+.slot-grid td{
+    border:1px solid #292929;
+    padding:10px 8px;
+    text-align:center;
+    white-space:nowrap;
+}
+
+.slot-grid th{
+    position:sticky;
+    top:0;
+    background:#202020;
+    color:#d4af37;
+    font-size:12px;
+    z-index:3;
+}
+
+.slot-grid th:first-child,
+.slot-grid td:first-child{
+    position:sticky;
+    left:0;
+    background:#151515;
+    z-index:2;
+}
+
+.slot-grid th:first-child{
+    z-index:4;
+}
+
+.slot-grid td{
+    background:#101010;
+    min-width:112px;
+}
+
+.slot-grid td.time-cell{
+    min-width:105px;
+    font-weight:bold;
+    color:#fff;
+}
+
+.grid-status{
+    font-size:11px;
+    font-weight:bold;
+    margin-bottom:7px;
+}
+
+.grid-available{
+    color:#62c174;
+}
+
+.grid-blocked{
+    color:#e57373;
+}
+
+.grid-booked{
+    color:#d4af37;
+}
+
+.grid-missing{
+    color:#777;
+}
+
+.grid-action{
+    padding:6px 8px;
+    font-size:10px;
+    border-radius:4px;
+}
+
+.grid-block-btn{
+    background:#e57373;
+}
+
+.grid-unblock-btn{
+    background:#62c174;
+}
+
+.grid-booked-btn{
+    background:#555;
+    color:#aaa;
+    cursor:not-allowed;
+}
+
+.grid-legend{
+    display:flex;
+    gap:20px;
+    flex-wrap:wrap;
+    margin-top:15px;
+    color:#aaa;
+    font-size:13px;
+}
+
+.legend-available{
+    color:#62c174;
+}
+
+.legend-blocked{
+    color:#e57373;
+}
+
+.legend-booked{
+    color:#d4af37;
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:1100px){
+
+    .stats-grid{
+        grid-template-columns:repeat(3,1fr);
+    }
+
+    .controls{
+        grid-template-columns:1fr 1fr 1fr;
+    }
+
+}
+
+@media(max-width:700px){
+
+    header{
+        padding:18px;
+    }
+
+    main{
+        margin-top:25px;
+        padding:0 12px;
+    }
+
+    .stats-grid{
+        grid-template-columns:1fr 1fr;
+    }
+
+    .controls{
+        grid-template-columns:1fr;
+    }
+
+    .panel{
+        padding:18px;
+    }
+
+}
+
+@media(max-width:450px){
+
+    .stats-grid{
+        grid-template-columns:1fr;
+    }
+
+}
+
+/* =========================
+   GALLERY MANAGER
+========================= */
+
+.gallery-admin-upload{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+}
+
+.gallery-admin-upload input[type="file"]{
+    padding:10px;
+    background:#0d0d0d;
+    border:1px solid #444;
+    border-radius:6px;
+    color:#aaa;
+    max-width:400px;
+}
+
+#galleryAdminMessage{
+    margin-bottom:20px;
+    color:#d4af37;
+}
+
+.admin-gallery-grid{
+    display:grid;
+    grid-template-columns:
+        repeat(auto-fill,minmax(180px,1fr));
+    gap:15px;
+}
+
+.admin-gallery-card{
+    background:#0d0d0d;
+    border:1px solid #292929;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+.admin-gallery-card img{
+    width:100%;
+    height:180px;
+    object-fit:cover;
+    display:block;
+}
+
+.admin-gallery-card-info{
+    padding:10px;
+}
+
+.admin-gallery-delete{
+    width:100%;
+    background:#e57373;
+    color:#fff;
+    padding:9px;
+    margin-top:8px;
+}
+
+.admin-gallery-delete:hover{
+    opacity:.85;
+}
+
+.gallery-empty{
+    color:#777;
+    padding:15px 0;
+}
+
+/* =========================
+   ABOUT PHOTO MANAGER
+========================= */
+
+.about-admin-upload{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+}
+
+.about-admin-upload input[type="file"]{
+    padding:10px;
+    background:#0d0d0d;
+    border:1px solid #444;
+    border-radius:6px;
+    color:#aaa;
+    max-width:400px;
+}
+
+#aboutAdminMessage{
+    margin-bottom:20px;
+    color:#d4af37;
+}
+
+.admin-about-preview{
+    max-width:500px;
+    border:1px solid #292929;
+    border-radius:10px;
+    overflow:hidden;
+    background:#0d0d0d;
+}
+
+.admin-about-preview img{
+    width:100%;
+    height:300px;
+    object-fit:cover;
+    display:block;
+}
+
+.admin-about-actions{
+    padding:10px;
+}
+
+.admin-about-delete{
+    width:100%;
+    background:#e57373;
+    color:#fff;
+    padding:9px;
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<header>
+
+    <div class="logo">
+        AMMY <span>BLENDZ</span>
+    </div>
+
+    <button id="logoutBtn">
+        LOGOUT
+    </button>
+
+</header>
+
+
+<main>
+
+    <h1>
+        Admin Dashboard
+    </h1>
+
+    <p class="subtitle">
+        Manage appointments and service availability
+    </p>
+
+
+    <!-- STATS -->
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <div class="stat-title">
+                Total Appointments
+            </div>
+
+            <div
+                class="stat-value"
+                id="totalAppointments"
+            >
+                0
+            </div>
+        </div>
+
+
+        <div class="stat-card">
+            <div class="stat-title">
+                Pending
+            </div>
+
+            <div
+                class="stat-value"
+                id="pendingAppointments"
+            >
+                0
+            </div>
+        </div>
+
+
+        <div class="stat-card">
+            <div class="stat-title">
+                Confirmed
+            </div>
+
+            <div
+                class="stat-value"
+                id="confirmedAppointments"
+            >
+                0
+            </div>
+        </div>
+
+
+        <div class="stat-card">
+            <div class="stat-title">
+                Today
+            </div>
+
+            <div
+                class="stat-value"
+                id="todayAppointments"
+            >
+                0
+            </div>
+        </div>
+
+
+        <div class="stat-card">
+            <div class="stat-title">
+                Past
+            </div>
+
+            <div
+                class="stat-value"
+                id="pastAppointments"
+            >
+                0
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- ADD AVAILABILITY -->
+
+    <div class="panel">
+
+        <h2>
+            Add Availability
+        </h2>
+
+        <div class="controls">
+
+            <input
+                type="date"
+                id="slotDate"
+            >
+
+            <input
+                type="time"
+                id="startTime"
+            >
+
+            <input
+                type="time"
+                id="endTime"
+            >
+
+            <select id="slotService">
+
+                <option value="">
+                    Select Service
+                </option>
+
+                <option>Men's Haircut</option>
+                <option>Skin Fade</option>
+                <option>Haircut + Beard</option>
+                <option>Women's Haircut</option>
+                <option>Kids Haircut</option>
+                <option>Root Touch-Up</option>
+                <option>Full Color</option>
+                <option>Toner/Gloss</option>
+                <option>Balayage</option>
+                <option>Highlights</option>
+                <option>Full Highlights</option>
+                <option>Color Correction</option>
+                <option>Hair Botox</option>
+                <option>Keratin/Smoothing</option>
+                <option>Deep Conditioning</option>
+                <option>Blow Dry</option>
+                <option>Curls/Waves</option>
+                <option>Special Occasion Styling</option>
+                <option>Scalp Treatment</option>
+                <option>Male Perm</option>
+                <option>Female Perm</option>
+
+            </select>
+
+
+            <button id="addSlotBtn">
+                ADD SLOT
+            </button>
+
+
+            <button id="generateSlotsBtn">
+                GENERATE DAY SLOTS
+            </button>
+
+        </div>
+
+        <div id="message"></div>
+
+    </div>
+
+
+
+    <!-- CUSTOMER APPOINTMENTS -->
+
+    <div class="panel">
+
+        <h2>
+            Customer Appointments
+        </h2>
+
+        <div class="table-wrap">
+
+            <table class="appointment-table">
+
+                <thead>
+
+                    <tr>
+
+                        <th>Customer</th>
+                        <th>Service</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Status</th>
+                        <th>Notes</th>
+                        <th>Action</th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody id="appointmentTableBody">
+
+                    <tr>
+
+                        <td
+                            colspan="7"
+                            class="empty"
+                        >
+                            Loading appointments...
+
+                        </td>
+
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    <!-- =========================
+        ABOUT PHOTO MANAGER
+    ========================= -->
+
+    <div class="panel">
+
+        <h2>
+            About Page Photo
+        </h2>
+
+        <div class="about-admin-upload">
+
+            <input
+                type="file"
+                id="aboutFile"
+                accept="image/*"
+            >
+
+            <button id="uploadAboutBtn">
+                UPLOAD / REPLACE PHOTO
+            </button>
+
+        </div>
+
+        <div id="aboutAdminMessage"></div>
+
+        <div id="adminAboutPreview" class="admin-about-preview">
+            <p class="empty" style="padding:15px;">
+                Loading About photo...
+            </p>
+        </div>
+
+    </div>
+
+    <!-- =========================
+        GALLERY MANAGER
+    ========================= -->
+
+    <div class="panel">
+
+        <h2>
+            Gallery Manager
+        </h2>
+
+        <div class="gallery-admin-upload">
+
+            <input
+                type="file"
+                id="galleryFile"
+                accept="image/*"
+            >
+
+            <button id="uploadGalleryBtn">
+                UPLOAD PHOTO
+            </button>
+
+        </div>
+
+        <div id="galleryAdminMessage"></div>
+
+        <div
+            id="adminGalleryGrid"
+            class="admin-gallery-grid"
+        >
+
+            <p class="empty">
+                Loading gallery...
+            </p>
+
+        </div>
+
+    </div>
+
+    <!-- SLOT GRID -->
+
+    <div class="panel">
+
+        <h2>
+
+            Slots for
+            <span id="selectedDateText">
+                Select a date
+            </span>
+
+        </h2>
+
+
+        <div id="slotList">
+
+            <p class="empty">
+                Select a date to view slots.
+            </p>
+
+        </div>
+
+
+        <div class="grid-legend">
+
+            <span class="legend-available">
+                ● AVAILABLE
+            </span>
+
+            <span class="legend-blocked">
+                ● BLOCKED
+            </span>
+
+            <span class="legend-booked">
+                ● BOOKED
+            </span>
+
+        </div>
+
+    </div>
+
+</main>
+
+
+<script>
+
+
+/* =========================================================
+   SUPABASE
+========================================================= */
+
+const supabaseUrl =
+    "https://kmhuytrqygpskmvcyimd.supabase.co";
+
+const supabaseKey =
+    "sb_publishable_rTnXNzLaXZ0hPGhsQJfT2Q_o9bCY0bN";
+
+const supabaseClient =
+    window.supabase.createClient(
+        supabaseUrl,
+        supabaseKey
+    );
+
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
+const slotDate =
+    document.getElementById("slotDate");
+
+const startTime =
+    document.getElementById("startTime");
+
+const endTime =
+    document.getElementById("endTime");
+
+const slotService =
+    document.getElementById("slotService");
+
+const addSlotBtn =
+    document.getElementById("addSlotBtn");
+
+const generateSlotsBtn =
+    document.getElementById("generateSlotsBtn");
+
+const slotList =
+    document.getElementById("slotList");
+
+const selectedDateText =
+    document.getElementById("selectedDateText");
+
+const message =
+    document.getElementById("message");
+
+const appointmentTableBody =
+    document.getElementById(
+        "appointmentTableBody"
+    );
+
+
+/* =========================================================
+   SERVICES
+========================================================= */
+
+const services = [
+
+    "Men's Haircut",
+    "Skin Fade",
+    "Haircut + Beard",
+    "Women's Haircut",
+    "Kids Haircut",
+    "Root Touch-Up",
+    "Full Color",
+    "Toner/Gloss",
+    "Balayage",
+    "Highlights",
+    "Full Highlights",
+    "Color Correction",
+    "Hair Botox",
+    "Keratin/Smoothing",
+    "Deep Conditioning",
+    "Blow Dry",
+    "Curls/Waves",
+    "Special Occasion Styling",
+    "Scalp Treatment",
+    "Male Perm",
+    "Female Perm"
+
+];
+
+
+/* =========================================================
+   SERVICE DURATIONS
+========================================================= */
+
+const durations = {
+
+    "Men's Haircut":30,
+    "Skin Fade":40,
+    "Haircut + Beard":60,
+    "Women's Haircut":60,
+    "Kids Haircut":30,
+    "Root Touch-Up":120,
+    "Full Color":150,
+    "Toner/Gloss":60,
+    "Balayage":240,
+    "Highlights":240,
+    "Full Highlights":240,
+    "Color Correction":180,
+    "Hair Botox":180,
+    "Keratin/Smoothing":240,
+    "Deep Conditioning":60,
+    "Blow Dry":60,
+    "Curls/Waves":60,
+    "Special Occasion Styling":90,
+    "Scalp Treatment":60,
+    "Male Perm":180,
+    "Female Perm":180
+
+};
+
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function escapeHTML(value){
+
+    return String(value ?? "")
+        .replace(/&/g,"&amp;")
+        .replace(/</g,"&lt;")
+        .replace(/>/g,"&gt;")
+        .replace(/"/g,"&quot;")
+        .replace(/'/g,"&#039;");
+
+}
+
+
+function getServiceName(serviceText){
+
+    let name =
+        (serviceText || "")
+            .replace(/\s*—.*$/,"")
+            .trim();
+
+    const serviceNameMap = {
+
+        "Men’s Haircut":
+            "Men's Haircut",
+
+        "Women’s Haircut":
+            "Women's Haircut",
+
+        "Keratin/Smoothing Treatment":
+            "Keratin/Smoothing",
+
+        "Deep Conditioning Treatment":
+            "Deep Conditioning"
+
+    };
+
+    return (
+        serviceNameMap[name] ||
+        name
+    );
+
+}
+
+
+function timeToMinutes(time){
+
+    const parts =
+        String(time)
+            .slice(0,5)
+            .split(":");
+
+    return (
+        Number(parts[0]) * 60 +
+        Number(parts[1])
+    );
+
+}
+
+
+function minutesToTime(minutes){
+
+    const hour =
+        Math.floor(minutes / 60);
+
+    const minute =
+        minutes % 60;
+
+    return (
+        String(hour).padStart(2,"0") +
+        ":" +
+        String(minute).padStart(2,"0") +
+        ":00"
+    );
+
+}
+
+
+function getTodayDate(){
+
+    const now =
+        new Date();
+
+    const year =
+        now.getFullYear();
+
+    const month =
+        String(
+            now.getMonth() + 1
+        ).padStart(2,"0");
+
+    const day =
+        String(
+            now.getDate()
+        ).padStart(2,"0");
+
+    return `${year}-${month}-${day}`;
+
+}
+
+
+function isPastAppointment(
+    date,
+    time
+){
+
+    const today =
+        getTodayDate();
+
+    if(date < today)
+        return true;
+
+    if(date > today)
+        return false;
+
+    return (
+        timeToMinutes(time) <
+        (
+            new Date()
+                .getHours() * 60 +
+            new Date()
+                .getMinutes()
+        )
+    );
+
+}
+
+
+/* =========================================================
+   AUTOMATICALLY DELETE APPOINTMENTS OLDER THAN 7 DAYS
+========================================================= */
+
+async function deleteAppointmentsOlderThan7Days(){
+
+    const cutoffDate =
+        new Date();
+
+    cutoffDate.setDate(
+        cutoffDate.getDate() - 7
+    );
+
+
+    const cutoff =
+        cutoffDate
+            .toISOString()
+            .split("T")[0];
+
+
+    console.log(
+        "Deleting bookings older than:",
+        cutoff
+    );
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+
+            .from("bookings")
+
+            .delete()
+
+            .lt(
+                "booking_date",
+                cutoff
+            );
+
+
+    if(error){
+
+        console.error(
+            "Automatic cleanup error:",
+            error
+        );
+
+        return;
+
+    }
+
+
+    console.log(
+        "7-day appointment cleanup completed."
+    );
+
+}
+
+
+/* =========================================================
+   ADMIN CHECK
+========================================================= */
+
+async function checkAdmin(){
+
+    const { data } =
+        await supabaseClient
+            .auth
+            .getSession();
+
+    if(!data.session){
+        window.location.replace("admin-login.html");
+        return false;
+    }
+
+    return true;
+
+}
+
+
+/* =========================================================
+   LOAD APPOINTMENTS
+========================================================= */
+
+async function loadAppointments(){
+
+    appointmentTableBody.innerHTML = `
+
+        <tr>
+
+            <td
+                colspan="7"
+                class="empty"
+            >
+                Loading appointments...
+            </td>
+
+        </tr>
+
+    `;
+
+
+    const {
+        data: bookings,
+        error
+    } =
+        await supabaseClient
+
+            .from("bookings")
+
+            .select("*")
+
+            .order(
+                "booking_date",
+                {
+                    ascending:true
+                }
+            )
+
+            .order(
+                "start_time",
+                {
+                    ascending:true
+                }
+            );
+
+
+    if(error){
+
+        console.error(
+            "Booking load error:",
+            error
+        );
+
+        appointmentTableBody.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="7"
+                    style="color:#e57373;"
+                >
+                    Unable to load appointments.
+                </td>
+
+            </tr>
+
+        `;
+
+        return;
+
+    }
+
+
+    if(
+        !bookings ||
+        bookings.length === 0
+    ){
+
+        appointmentTableBody.innerHTML = `
+
+            <tr>
+
+                <td
+                    colspan="7"
+                    class="empty"
+                >
+                    No appointments yet.
+                </td>
+
+            </tr>
+
+        `;
+
+        updateStats([]);
+
+        return;
+
+    }
+
+
+    updateStats(bookings);
+
+
+    appointmentTableBody.innerHTML = "";
+
+
+    bookings.forEach(
+        booking => {
+
+            const date =
+                booking.booking_date || "";
+
+            const time =
+                booking.start_time
+                    ? booking.start_time.slice(0,5)
+                    : "";
+
+
+            const past =
+                isPastAppointment(
+                    date,
+                    time
+                );
+
+
+            let statusHTML = "";
+
+            let actionHTML = "";
+
+
+            if(past){
+
+                statusHTML = `
+
+                    <span
+                        class="
+                            status-badge
+                            status-past
+                        "
+                    >
+                        PAST
+                    </span>
+
+                `;
+
+
+                actionHTML = `
+
+                    <button
+                        class="delete-btn"
+                        onclick="
+                            deletePastAppointment(
+                                ${Number(booking.id)}
+                            )
+                        "
+                    >
+                        DELETE
+                    </button>
+
+                `;
+
+            }else{
+
+                if(
+                    booking.status ===
+                    "confirmed"
+                ){
+
+                    statusHTML = `
+
+                        <span
+                            class="
+                                status-badge
+                                status-confirmed
+                            "
+                        >
+                            CONFIRMED
+                        </span>
+
+                    `;
+
+                    actionHTML = `
+                        <span class="no-action">
+                            —
+                        </span>
+                    `;
+
+                }else if(
+                    booking.status ===
+                    "rejected"
+                ){
+
+                    statusHTML = `
+
+                        <span
+                            class="
+                                status-badge
+                                status-rejected
+                            "
+                        >
+                            REJECTED
+                        </span>
+
+                    `;
+
+                    actionHTML = `
+                        <span class="no-action">
+                            —
+                        </span>
+                    `;
+
+                }else{
+
+                    statusHTML = `
+
+                        <span
+                            class="
+                                status-badge
+                                status-pending
+                            "
+                        >
+                            PENDING
+                        </span>
+
+                    `;
+
+
+                    actionHTML = `
+
+                        <div
+                            class="action-buttons"
+                        >
+
+                            <button
+                                class="confirm-btn"
+                                onclick="
+                                    confirmBooking(
+                                        ${Number(booking.id)}
+                                    )
+                                "
+                            >
+                                CONFIRM
+                            </button>
+
+                            <button
+                                class="reject-btn"
+                                onclick="
+                                    rejectBooking(
+                                        ${Number(booking.id)}
+                                    )
+                                "
+                            >
+                                REJECT
+                            </button>
+
+                        </div>
+
+                    `;
+
+                }
+
+            }
+
+
+            const row =
+                document.createElement("tr");
+
+
+            row.innerHTML = `
+
+                <td>
+
+                    <div
+                        class="customer-name"
+                    >
+                        ${escapeHTML(
+                            booking.customer_name
+                        )}
+                    </div>
+
+                    <div
+                        class="customer-phone"
+                    >
+                        ${escapeHTML(
+                            booking.phone
+                        )}
+                    </div>
+
+                </td>
+
+
+                <td>
+                    ${escapeHTML(
+                        booking.service
+                    )}
+                </td>
+
+
+                <td>
+                    ${escapeHTML(date)}
+                </td>
+
+
+                <td>
+                    ${escapeHTML(time)}
+                </td>
+
+
+                <td>
+                    ${statusHTML}
+                </td>
+
+
+                <td
+                    class="notes-cell"
+                >
+                    ${
+                        booking.notes
+                            ? escapeHTML(
+                                booking.notes
+                              )
+                            : "—"
+                    }
+                </td>
+
+
+                <td>
+                    ${actionHTML}
+                </td>
+
+            `;
+
+
+            appointmentTableBody.appendChild(
+                row
+            );
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   STATS
+========================================================= */
+
+function updateStats(bookings){
+
+    const total =
+        bookings.length;
+
+
+    const pending =
+        bookings.filter(
+            booking =>
+                booking.status ===
+                "pending"
+        ).length;
+
+
+    const confirmed =
+        bookings.filter(
+            booking =>
+                booking.status ===
+                "confirmed"
+        ).length;
+
+
+    const today =
+        getTodayDate();
+
+
+    const todayCount =
+        bookings.filter(
+            booking =>
+                booking.booking_date ===
+                today
+        ).length;
+
+
+    const past =
+        bookings.filter(
+            booking =>
+                isPastAppointment(
+                    booking.booking_date,
+                    booking.start_time
+                )
+        ).length;
+
+
+    document.getElementById(
+        "totalAppointments"
+    ).textContent =
+        total;
+
+
+    document.getElementById(
+        "pendingAppointments"
+    ).textContent =
+        pending;
+
+
+    document.getElementById(
+        "confirmedAppointments"
+    ).textContent =
+        confirmed;
+
+
+    document.getElementById(
+        "todayAppointments"
+    ).textContent =
+        todayCount;
+
+
+    document.getElementById(
+        "pastAppointments"
+    ).textContent =
+        past;
+
+}
+
+
+/* =========================================================
+   LOAD SLOT GRID
+========================================================= */
+
+async function loadSlots(){
+
+    const date =
+        slotDate.value;
+
+
+    if(!date){
+
+        slotList.innerHTML =
+            '<p class="empty">Select a date to view slots.</p>';
+
+        return;
+
+    }
+
+
+    selectedDateText.textContent =
+        date;
+
+
+    slotList.innerHTML =
+        '<p class="empty">Loading availability...</p>';
+
+
+    const {
+        data: slots,
+        error
+    } =
+        await supabaseClient
+
+            .from("slots")
+
+            .select(
+                "id,start_time,end_time,status,service"
+            )
+
+            .eq(
+                "slot_date",
+                date
+            )
+
+            .order(
+                "start_time",
+                {
+                    ascending:true
+                }
+            );
+
+
+    if(error){
+
+        console.error(error);
+
+        slotList.innerHTML =
+            '<p style="color:#e57373;">Unable to load slots.</p>';
+
+        return;
+
+    }
+
+
+    if(
+        !slots ||
+        slots.length === 0
+    ){
+
+        slotList.innerHTML =
+            '<p class="empty">No slots for this date.</p>';
+
+        return;
+
+    }
+
+
+    const groups = {};
+
+
+    slots.forEach(slot => {
+
+        const start =
+            slot.start_time.slice(0,5);
+
+        const end =
+            slot.end_time.slice(0,5);
+
+        const key =
+            start + "__" + end;
+
+
+        if(!groups[key]){
+
+            groups[key] = {
+
+                start:start,
+                end:end,
+                services:{}
+
+            };
+
+        }
+
+
+        groups[key].services[
+            slot.service
+        ] = slot;
+
+    });
+
+
+    const sortedGroups =
+        Object.values(groups).sort(
+            (a,b) =>
+                a.start.localeCompare(
+                    b.start
+                )
+        );
+
+
+    const bookedRuns = {};
+
+
+    services.forEach(service => {
+
+        bookedRuns[service] = [];
+
+        let currentRun = null;
+
+
+        sortedGroups.forEach(
+            (group,index) => {
+
+                const slot =
+                    group.services[
+                        service
+                    ];
+
+
+                const isBooked =
+                    slot &&
+                    slot.status ===
+                    "booked";
+
+
+                if(isBooked){
+
+                    if(!currentRun){
+
+                        currentRun = {
+
+                            startIndex:index,
+                            endIndex:index,
+                            start:group.start,
+                            end:group.end
+
+                        };
+
+                    }else{
+
+                        const previousGroup =
+                            sortedGroups[
+                                currentRun.endIndex
+                            ];
+
+
+                        const previousEnd =
+                            timeToMinutes(
+                                previousGroup.end
+                            );
+
+
+                        const currentStart =
+                            timeToMinutes(
+                                group.start
+                            );
+
+
+                        if(
+                            currentStart ===
+                            previousEnd
+                        ){
+
+                            currentRun.endIndex =
+                                index;
+
+                            currentRun.end =
+                                group.end;
+
+                        }else{
+
+                            bookedRuns[
+                                service
+                            ].push(
+                                currentRun
+                            );
+
+
+                            currentRun = {
+
+                                startIndex:index,
+                                endIndex:index,
+                                start:group.start,
+                                end:group.end
+
+                            };
+
+                        }
+
+                    }
+
+                }else{
+
+                    if(currentRun){
+
+                        bookedRuns[
+                            service
+                        ].push(
+                            currentRun
+                        );
+
+                        currentRun = null;
+
+                    }
+
+                }
+
+            }
+        );
+
+
+        if(currentRun){
+
+            bookedRuns[
+                service
+            ].push(
+                currentRun
+            );
+
+        }
+
+    });
+
+
+    let html = `
+
+        <div class="slot-grid-wrap">
+
+            <table class="slot-grid">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            TIME
+                        </th>
+
+    `;
+
+
+    services.forEach(service => {
+
+        html += `
+
+            <th>
+                ${escapeHTML(service)}
+            </th>
+
+        `;
+
+    });
+
+
+    html += `
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+    `;
+
+
+    const skipRows = {};
+
+
+    services.forEach(service => {
+
+        skipRows[service] =
+            new Set();
+
+    });
+
+
+    sortedGroups.forEach(
+        (group,rowIndex) => {
+
+            html += `
+
+                <tr>
+
+                    <td class="time-cell">
+
+                        ${group.start}
+
+                        <br>
+
+                        ↓
+
+                        <br>
+
+                        ${group.end}
+
+                    </td>
+
+            `;
+
+
+            services.forEach(service => {
+
+                if(
+                    skipRows[
+                        service
+                    ].has(rowIndex)
+                ){
+
+                    return;
+
+                }
+
+
+                const slot =
+                    group.services[
+                        service
+                    ];
+
+
+                const bookedRun =
+                    bookedRuns[
+                        service
+                    ].find(
+                        run =>
+                            run.startIndex ===
+                            rowIndex
+                    );
+
+
+                if(bookedRun){
+
+                    const rowspan =
+                        bookedRun.endIndex -
+                        bookedRun.startIndex +
+                        1;
+
+
+                    for(
+                        let i =
+                            rowIndex + 1;
+
+                        i <=
+                            bookedRun.endIndex;
+
+                        i++
+                    ){
+
+                        skipRows[
+                            service
+                        ].add(i);
+
+                    }
+
+
+                    html += `
+
+                        <td
+                            rowspan="${rowspan}"
+                        >
+
+                            <div
+                                class="
+                                    grid-status
+                                    grid-booked
+                                "
+                            >
+
+                                BOOKED
+                                ${bookedRun.start}
+                                –
+                                ${bookedRun.end}
+
+                            </div>
+
+
+                            <button
+                                class="
+                                    grid-action
+                                    grid-booked-btn
+                                "
+                                disabled
+                            >
+                                BOOKED
+                            </button>
+
+                        </td>
+
+                    `;
+
+                    return;
+
+                }
+
+
+                if(!slot){
+
+                    html += `
+
+                        <td>
+
+                            <span
+                                class="
+                                    grid-status
+                                    grid-missing
+                                "
+                            >
+                                NOT SET
+                            </span>
+
+                        </td>
+
+                    `;
+
+                    return;
+
+                }
+
+
+                if(
+                    slot.status ===
+                    "available"
+                ){
+
+                    html += `
+
+                        <td>
+
+                            <div
+                                class="
+                                    grid-status
+                                    grid-available
+                                "
+                            >
+                                AVAILABLE
+                            </div>
+
+                            <button
+                                class="
+                                    grid-action
+                                    grid-block-btn
+                                "
+                                onclick="
+                                    changeSlotStatus(
+                                        ${Number(slot.id)},
+                                        'blocked'
+                                    )
+                                "
+                            >
+                                BLOCK
+                            </button>
+
+                        </td>
+
+                    `;
+
+                    return;
+
+                }
+
+
+                if(
+                    slot.status ===
+                    "blocked"
+                ){
+
+                    html += `
+
+                        <td>
+
+                            <div
+                                class="
+                                    grid-status
+                                    grid-blocked
+                                "
+                            >
+                                BLOCKED
+                            </div>
+
+                            <button
+                                class="
+                                    grid-action
+                                    grid-unblock-btn
+                                "
+                                onclick="
+                                    changeSlotStatus(
+                                        ${Number(slot.id)},
+                                        'available'
+                                    )
+                                "
+                            >
+                                UNBLOCK
+                            </button>
+
+                        </td>
+
+                    `;
+
+                }
+
+            });
+
+
+            html += `
+
+                </tr>
+
+            `;
+
+        }
+    );
+
+
+    html += `
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    `;
+
+
+    slotList.innerHTML =
+        html;
+
+}
+
+
+/* =========================================================
+   ADD SINGLE SLOT
+========================================================= */
+
+addSlotBtn.addEventListener(
+    "click",
+    async () => {
+
+        const date =
+            slotDate.value;
+
+        const start =
+            startTime.value;
+
+        const end =
+            endTime.value;
+
+        const service =
+            slotService.value;
+
+
+        if(
+            !date ||
+            !start ||
+            !end ||
+            !service
+        ){
+
+            message.textContent =
+                "Please fill date, time and service.";
+
+            return;
+
+        }
+
+
+        if(start >= end){
+
+            message.textContent =
+                "End time must be after start time.";
+
+            return;
+
+        }
+
+
+        message.textContent =
+            "Checking slot...";
+
+
+        const {
+            data:existing,
+            error:existingError
+        } =
+            await supabaseClient
+
+                .from("slots")
+
+                .select("id")
+
+                .eq(
+                    "slot_date",
+                    date
+                )
+
+                .eq(
+                    "start_time",
+                    `${start}:00`
+                )
+
+                .eq(
+                    "end_time",
+                    `${end}:00`
+                )
+
+                .eq(
+                    "service",
+                    service
+                )
+
+                .maybeSingle();
+
+
+        if(existingError){
+
+            console.error(
+                existingError
+            );
+
+            message.textContent =
+                "Error checking existing slot.";
+
+            return;
+
+        }
+
+
+        if(existing){
+
+            message.textContent =
+                "This service slot already exists.";
+
+            return;
+
+        }
+
+
+        const {
+            error
+        } =
+            await supabaseClient
+
+                .from("slots")
+
+                .insert([{
+
+                    slot_date:date,
+                    start_time:start,
+                    end_time:end,
+                    status:"available",
+                    service:service
+
+                }]);
+
+
+        if(error){
+
+            console.error(error);
+
+            message.textContent =
+                "Unable to add slot.";
+
+            return;
+
+        }
+
+
+        message.textContent =
+            "Slot added successfully.";
+
+        startTime.value = "";
+        endTime.value = "";
+        slotService.value = "";
+
+        loadSlots();
+
+    }
+);
+
+
+/* =========================================================
+   GENERATE DAY SLOTS
+========================================================= */
+
+generateSlotsBtn.addEventListener(
+    "click",
+    async () => {
+
+        const date =
+            slotDate.value;
+
+
+        if(!date){
+
+            message.textContent =
+                "Please select a date first.";
+
+            return;
+
+        }
+
+
+        message.textContent =
+            "Generating service slots...";
+
+
+        const opening =
+            10 * 60;
+
+        const closing =
+            21 * 60;
+
+
+        const {
+            data:existingSlots,
+            error
+        } =
+            await supabaseClient
+
+                .from("slots")
+
+                .select(
+                    "start_time,end_time,status,service"
+                )
+
+                .eq(
+                    "slot_date",
+                    date
+                );
+
+
+        if(error){
+
+            console.error(error);
+
+            message.textContent =
+                "Unable to check existing slots.";
+
+            return;
+
+        }
+
+
+        const newSlots = [];
+
+
+        for(
+            let minutes = opening;
+
+            minutes < closing;
+
+            minutes += 30
+        ){
+
+            const start =
+                minutesToTime(
+                    minutes
+                );
+
+            const end =
+                minutesToTime(
+                    minutes + 30
+                );
+
+
+            services.forEach(
+                service => {
+
+                    const exists =
+                        existingSlots.some(
+                            slot =>
+                                slot.start_time ===
+                                    start &&
+                                slot.end_time ===
+                                    end &&
+                                slot.service ===
+                                    service
+                        );
+
+
+                    if(!exists){
+
+                        newSlots.push({
+
+                            slot_date:date,
+                            start_time:start,
+                            end_time:end,
+                            status:"available",
+                            service:service
+
+                        });
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        if(
+            newSlots.length === 0
+        ){
+
+            message.textContent =
+                "All service slots already exist for this date.";
+
+            loadSlots();
+
+            return;
+
+        }
+
+
+        const {
+            error:insertError
+        } =
+            await supabaseClient
+
+                .from("slots")
+
+                .insert(
+                    newSlots
+                );
+
+
+        if(insertError){
+
+            console.error(
+                insertError
+            );
+
+            message.textContent =
+                "Unable to generate service slots.";
+
+            return;
+
+        }
+
+
+        message.textContent =
+            `${newSlots.length} service slots generated successfully.`;
+
+        loadSlots();
+
+    }
+);
+
+
+/* =========================================================
+   BLOCK / UNBLOCK
+========================================================= */
+
+async function changeSlotStatus(
+    id,
+    newStatus
+){
+
+    const {
+        error
+    } =
+        await supabaseClient
+
+            .from("slots")
+
+            .update({
+
+                status:newStatus
+
+            })
+
+            .eq(
+                "id",
+                id
+            );
+
+
+    if(error){
+
+        console.error(error);
+
+        alert(
+            "Unable to update slot."
+        );
+
+        return;
+
+    }
+
+
+    loadSlots();
+
+}
+
+
+/* =========================================================
+   CONFIRM BOOKING
+========================================================= */
+
+async function confirmBooking(
+    bookingId
+){
+
+    if(
+        !confirm(
+            "Confirm this appointment?"
+        )
+    ){
+
+        return;
+
+    }
+
+
+    const {
+        data:booking,
+        error:bookingError
+    } =
+        await supabaseClient
+
+            .from("bookings")
+
+            .select("*")
+
+            .eq(
+                "id",
+                bookingId
+            )
+
+            .single();
+
+
+    if(bookingError){
+
+        console.error(
+            bookingError
+        );
+
+        alert(
+            "Unable to load booking."
+        );
+
+        return;
+
+    }
+
+
+    if(
+        booking.status !==
+        "pending"
+    ){
+
+        alert(
+            "This booking has already been processed."
+        );
+
+        return;
+
+    }
+
+
+    const serviceName =
+        getServiceName(
+            booking.service
+        );
+
+
+    const duration =
+        durations[
+            serviceName
+        ] || 30;
+
+
+    const requiredBlocks =
+        Math.ceil(
+            duration / 30
+        );
+
+
+    const bookingStart =
+        timeToMinutes(
+            booking.start_time
+        );
+
+
+    const {
+        data:slots,
+        error:slotsError
+    } =
+        await supabaseClient
+
+            .from("slots")
+
+            .select(
+                "id,start_time,end_time,status,service"
+            )
+
+            .eq(
+                "slot_date",
+                booking.booking_date
+            )
+
+            .eq(
+                "service",
+                serviceName
+            )
+
+            .order(
+                "start_time",
+                {
+                    ascending:true
+                }
+            );
+
+
+    if(slotsError){
+
+        console.error(
+            slotsError
+        );
+
+        alert(
+            "Unable to load appointment slots."
+        );
+
+        return;
+
+    }
+
+
+    const slotMap = {};
+
+
+    slots.forEach(slot => {
+
+        slotMap[
+            timeToMinutes(
+                slot.start_time
+            )
+        ] = slot;
+
+    });
+
+
+    const slotsToBook = [];
+
+    let valid = true;
+
+
+    for(
+        let i = 0;
+
+        i < requiredBlocks;
+
+        i++
+    ){
+
+        const requiredStart =
+            bookingStart +
+            (i * 30);
+
+
+        const slot =
+            slotMap[
+                requiredStart
+            ];
+
+
+        if(
+            !slot ||
+            slot.status !==
+            "available"
+        ){
+
+            valid = false;
+
+            break;
+
+        }
+
+
+        slotsToBook.push(
+            slot
+        );
+
+    }
+
+
+    if(!valid){
+
+        alert(
+            "The required time is no longer fully available for this service."
+        );
+
+        loadSlots();
+
+        return;
+
+    }
+
+
+    const {
+        error:slotUpdateError
+    } =
+        await supabaseClient
+
+            .from("slots")
+
+            .update({
+
+                status:"booked"
+
+            })
+
+            .in(
+                "id",
+                slotsToBook.map(
+                    slot => slot.id
+                )
+            );
+
+
+    if(slotUpdateError){
+
+        console.error(
+            slotUpdateError
+        );
+
+        alert(
+            "Unable to book the selected time slots."
+        );
+
+        return;
+
+    }
+
+
+    const {
+        error:updateError
+    } =
+        await supabaseClient
+
+            .from("bookings")
+
+            .update({
+
+                status:"confirmed"
+
+            })
+
+            .eq(
+                "id",
+                bookingId
+            );
+
+
+    if(updateError){
+
+        console.error(
+            updateError
+        );
+
+        alert(
+            "Unable to confirm booking."
+        );
+
+        return;
+
+    }
+
+
+    alert(
+        "Appointment confirmed and time slot booked!"
+    );
+
+
+    loadAppointments();
+    loadSlots();
+
+}
+
+
+/* =========================================================
+   REJECT BOOKING
+========================================================= */
+
+async function rejectBooking(
+    bookingId
+){
+
+    if(
+        !confirm(
+            "Reject this appointment request?"
+        )
+    ){
+
+        return;
+
+    }
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+
+            .from("bookings")
+
+            .update({
+
+                status:"rejected"
+
+            })
+
+            .eq(
+                "id",
+                bookingId
+            );
+
+
+    if(error){
+
+        console.error(error);
+
+        alert(
+            "Unable to reject booking."
+        );
+
+        return;
+
+    }
+
+
+    alert(
+        "Appointment rejected."
+    );
+
+
+    loadAppointments();
+    loadSlots();
+
+}
+
+
+/* =========================================================
+   MANUAL DELETE PAST APPOINTMENT
+========================================================= */
+
+async function deletePastAppointment(
+    bookingId
+){
+
+    const confirmed =
+        confirm(
+            "Delete this past appointment permanently?"
+        );
+
+
+    if(!confirmed)
+        return;
+
+
+    const {
+        error
+    } =
+        await supabaseClient
+
+            .from("bookings")
+
+            .delete()
+
+            .eq(
+                "id",
+                bookingId
+            );
+
+
+    if(error){
+
+        console.error(
+            "Delete error:",
+            error
+        );
+
+        alert(
+            "Unable to delete appointment:\n\n" +
+            error.message
+        );
+
+        return;
+
+    }
+
+
+    alert(
+        "Appointment deleted successfully."
+    );
+
+
+    await loadAppointments();
+    await loadSlots();
+
+}
+
+
+/* =========================================================
+   DATE CHANGE
+========================================================= */
+
+slotDate.addEventListener(
+    "change",
+    loadSlots
+);
+
+
+/* =========================================================
+   LOGOUT
+========================================================= */
+
+document
+    .getElementById("logoutBtn")
+    .addEventListener(
+        "click",
+        async () => {
+
+            await supabaseClient
+                .auth
+                .signOut();
+
+            window.location.href =
+                "admin.html";
+
+        }
+    );
+
+/* =========================================================
+   GALLERY MANAGER
+========================================================= */
+
+const galleryFile =
+    document.getElementById("galleryFile");
+
+const uploadGalleryBtn =
+    document.getElementById("uploadGalleryBtn");
+
+const adminGalleryGrid =
+    document.getElementById("adminGalleryGrid");
+
+const galleryAdminMessage =
+    document.getElementById("galleryAdminMessage");
+
+
+/* =========================================================
+   LOAD ADMIN GALLERY
+========================================================= */
+
+async function loadAdminGallery(){
+
+    if(!adminGalleryGrid)
+        return;
+
+
+    adminGalleryGrid.innerHTML = `
+        <p class="gallery-empty">
+            Loading gallery...
+        </p>
+    `;
+
+
+    const {
+        data,
+        error
+    } =
+        await supabaseClient
+
+            .from("gallery_photos")
+
+            .select("*")
+
+            .not("file_name","eq","__about__")
+
+            .order(
+                "created_at",
+                {
+                    ascending:false
+                }
+            );
+
+
+    if(error){
+
+        console.error(
+            "Admin gallery load error:",
+            error
+        );
+
+        adminGalleryGrid.innerHTML = `
+            <p style="color:#e57373;">
+                Unable to load gallery.
+            </p>
+        `;
+
+        return;
+
+    }
+
+
+    if(
+        !data ||
+        data.length === 0
+    ){
+
+        adminGalleryGrid.innerHTML = `
+            <p class="gallery-empty">
+                No gallery photos yet.
+            </p>
+        `;
+
+        return;
+
+    }
+
+
+    adminGalleryGrid.innerHTML = "";
+
+
+    data.forEach(photo => {
+
+        const card =
+            document.createElement("div");
+
+
+        card.className =
+            "admin-gallery-card";
+
+
+        card.innerHTML = `
+
+            <img
+                src="${escapeHTML(photo.image_url)}"
+                alt="Gallery photo"
+                loading="lazy"
+            >
+
+            <div
+                class="admin-gallery-card-info"
+            >
+
+                <button
+                    class="admin-gallery-delete"
+                    onclick="
+                        deleteGalleryPhoto(
+                            '${photo.id}',
+                            '${encodeURIComponent(photo.image_url)}'
+                        )
+                    "
+                >
+                    DELETE
+                </button>
+
+            </div>
+
+        `;
+
+
+        adminGalleryGrid.appendChild(card);
+
+    });
+
+}
+
+
+/* =========================================================
+   UPLOAD GALLERY PHOTO
+========================================================= */
+
+if(uploadGalleryBtn){
+
+    uploadGalleryBtn.addEventListener(
+        "click",
+        async () => {
+
+            const file =
+                galleryFile.files[0];
+
+
+            if(!file){
+
+                galleryAdminMessage.textContent =
+                    "Please select a photo first.";
+
+                return;
+
+            }
+
+
+            if(
+                !file.type.startsWith("image/")
+            ){
+
+                galleryAdminMessage.textContent =
+                    "Please select an image file.";
+
+                return;
+
+            }
+
+
+            if(
+                file.size >
+                10 * 1024 * 1024
+            ){
+
+                galleryAdminMessage.textContent =
+                    "Image must be smaller than 10 MB.";
+
+                return;
+
+            }
+
+
+            uploadGalleryBtn.disabled = true;
+
+            galleryAdminMessage.textContent =
+                "Uploading photo...";
+
+
+            try{
+
+                /*
+                 * Create unique filename
+                 */
+
+                const extension =
+                    file.name
+                        .split(".")
+                        .pop()
+                        .toLowerCase();
+
+
+                const fileName =
+                    `${Date.now()}-${crypto.randomUUID()}.${extension}`;
+
+
+                /*
+                 * Upload to Storage
+                 */
+
+                const {
+                    error:uploadError
+                } =
+                    await supabaseClient
+
+                        .storage
+
+                        .from("gallery")
+
+                        .upload(
+                            fileName,
+                            file,
+                            {
+                                cacheControl:"3600",
+                                upsert:false
+                            }
+                        );
+
+
+                if(uploadError){
+
+                    throw uploadError;
+
+                }
+
+
+                /*
+                 * Get public URL
+                 */
+
+                const {
+                    data:urlData
+                } =
+                    supabaseClient
+
+                        .storage
+
+                        .from("gallery")
+
+                        .getPublicUrl(
+                            fileName
+                        );
+
+
+                const imageUrl =
+                    urlData.publicUrl;
+
+
+                /*
+                 * Save URL to gallery_photos
+                 */
+
+                const {
+                    error:databaseError
+                } =
+                    await supabaseClient
+
+                        .from("gallery_photos")
+
+                        .insert({
+
+                            file_name:fileName,
+                            image_url:imageUrl
+
+                        });
+
+
+                if(databaseError){
+
+                    /*
+                     * If database insert fails,
+                     * remove uploaded image
+                     */
+
+                    await supabaseClient
+
+                        .storage
+
+                        .from("gallery")
+
+                        .remove([
+                            fileName
+                        ]);
+
+
+                    throw databaseError;
+
+                }
+
+
+                galleryAdminMessage.textContent =
+                    "Photo uploaded successfully.";
+
+
+                galleryFile.value = "";
+
+
+                await loadAdminGallery();
+
+
+            }catch(error){
+
+                console.error(
+                    "Gallery upload error:",
+                    error
+                );
+
+
+                galleryAdminMessage.textContent =
+                    "Unable to upload photo: " +
+                    error.message;
+
+
+            }finally{
+
+                uploadGalleryBtn.disabled =
+                    false;
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   DELETE GALLERY PHOTO
+========================================================= */
+
+async function deleteGalleryPhoto(
+    photoId,
+    encodedImageUrl
+){
+
+    const confirmed =
+        confirm(
+            "Delete this gallery photo?"
+        );
+
+
+    if(!confirmed)
+        return;
+
+
+    galleryAdminMessage.textContent =
+        "Deleting photo...";
+
+
+    try{
+
+        const imageUrl =
+            decodeURIComponent(
+                encodedImageUrl
+            );
+
+
+        /*
+         * Get filename from public URL
+         */
+
+        const marker =
+            "/storage/v1/object/public/gallery/";
+
+
+        const markerIndex =
+            imageUrl.indexOf(marker);
+
+
+        if(
+            markerIndex === -1
+        ){
+
+            throw new Error(
+                "Invalid gallery image URL."
+            );
+
+        }
+
+
+        const filePath =
+            imageUrl.substring(
+                markerIndex + marker.length
+            );
+
+
+        /*
+         * Delete image from Storage
+         */
+
+        const {
+            error:storageError
+        } =
+            await supabaseClient
+
+                .storage
+
+                .from("gallery")
+
+                .remove([
+                    filePath
+                ]);
+
+
+        if(storageError){
+
+            throw storageError;
+
+        }
+
+
+        /*
+         * Delete database record
+         */
+
+        const {
+            error:databaseError
+        } =
+            await supabaseClient
+
+                .from("gallery_photos")
+
+                .delete()
+
+                .eq(
+                    "id",
+                    photoId
+                );
+
+
+        if(databaseError){
+
+            throw databaseError;
+
+        }
+
+
+        galleryAdminMessage.textContent =
+            "Photo deleted successfully.";
+
+
+        await loadAdminGallery();
+
+
+    }catch(error){
+
+        console.error(
+            "Gallery delete error:",
+            error
+        );
+
+
+        galleryAdminMessage.textContent =
+            "Unable to delete photo: " +
+            error.message;
+
+    }
+
+}
+
+
+/* =========================================================
+   ABOUT PHOTO MANAGER
+========================================================= */
+
+const aboutFile =
+    document.getElementById("aboutFile");
+
+const uploadAboutBtn =
+    document.getElementById("uploadAboutBtn");
+
+const adminAboutPreview =
+    document.getElementById("adminAboutPreview");
+
+const aboutAdminMessage =
+    document.getElementById("aboutAdminMessage");
+
+
+async function getAboutPhoto(){
+
+    const {
+        data,
+        error
+    } = await supabaseClient
+        .from("gallery_photos")
+        .select("id,file_name,image_url")
+        .eq("file_name","__about__")
+        .maybeSingle();
+
+    if(error)
+        throw error;
+
+    return data;
+}
+
+
+async function loadAboutPhoto(){
+
+    if(!adminAboutPreview)
+        return;
+
+    adminAboutPreview.innerHTML = `
+        <p class="empty" style="padding:15px;">
+            Loading About photo...
+        </p>
+    `;
+
+    try{
+
+        const photo = await getAboutPhoto();
+
+        if(!photo){
+
+            adminAboutPreview.innerHTML = `
+                <p class="empty" style="padding:15px;">
+                    No About photo uploaded yet.
+                </p>
+            `;
+
+            return;
+        }
+
+        adminAboutPreview.innerHTML = `
+
+            <img
+                src="${escapeHTML(photo.image_url)}"
+                alt="About page photo"
+                loading="lazy"
+            >
+
+            <div class="admin-about-actions">
+
+                <button
+                    class="admin-about-delete"
+                    onclick="deleteAboutPhoto('${photo.id}','${encodeURIComponent(photo.image_url)}')"
+                >
+                    DELETE ABOUT PHOTO
+                </button>
+
+            </div>
+
+        `;
+
+    }catch(error){
+
+        console.error(
+            "About photo load error:",
+            error
+        );
+
+        adminAboutPreview.innerHTML = `
+            <p style="color:#e57373;padding:15px;">
+                Unable to load About photo.
+            </p>
+        `;
+    }
+}
+
+
+async function removeStorageImageFromUrl(imageUrl){
+
+    const marker =
+        "/storage/v1/object/public/gallery/";
+
+    const markerIndex =
+        imageUrl.indexOf(marker);
+
+    if(markerIndex === -1)
+        throw new Error("Invalid gallery image URL.");
+
+    const filePath =
+        imageUrl.substring(
+            markerIndex + marker.length
+        );
+
+    const {
+        error
+    } = await supabaseClient
+        .storage
+        .from("gallery")
+        .remove([filePath]);
+
+    if(error)
+        throw error;
+}
+
+
+if(uploadAboutBtn){
+
+    uploadAboutBtn.addEventListener(
+        "click",
+        async () => {
+
+            const file =
+                aboutFile.files[0];
+
+            if(!file){
+
+                aboutAdminMessage.textContent =
+                    "Please select a photo first.";
+
+                return;
+            }
+
+            if(!file.type.startsWith("image/")){
+
+                aboutAdminMessage.textContent =
+                    "Please select an image file.";
+
+                return;
+            }
+
+            if(file.size > 10 * 1024 * 1024){
+
+                aboutAdminMessage.textContent =
+                    "Image must be smaller than 10 MB.";
+
+                return;
+            }
+
+            uploadAboutBtn.disabled = true;
+            aboutAdminMessage.textContent =
+                "Uploading About photo...";
+
+            try{
+
+                /* Get current About photo first */
+                const oldPhoto =
+                    await getAboutPhoto();
+
+                /* Upload new image */
+                const extension =
+                    file.name
+                        .split(".")
+                        .pop()
+                        .toLowerCase();
+
+                const storageFileName =
+                    `about-${Date.now()}-${crypto.randomUUID()}.${extension}`;
+
+                const {
+                    error:uploadError
+                } = await supabaseClient
+                    .storage
+                    .from("gallery")
+                    .upload(
+                        storageFileName,
+                        file,
+                        {
+                            cacheControl:"3600",
+                            upsert:false
+                        }
+                    );
+
+                if(uploadError)
+                    throw uploadError;
+
+                const {
+                    data:urlData
+                } = supabaseClient
+                    .storage
+                    .from("gallery")
+                    .getPublicUrl(
+                        storageFileName
+                    );
+
+                const imageUrl =
+                    urlData.publicUrl;
+
+                /* Remove old database record */
+                if(oldPhoto){
+
+                    const {
+                        error:deleteDbError
+                    } = await supabaseClient
+                        .from("gallery_photos")
+                        .delete()
+                        .eq("id",oldPhoto.id);
+
+                    if(deleteDbError)
+                        throw deleteDbError;
+
+                    /* Remove old image from Storage */
+                    await removeStorageImageFromUrl(
+                        oldPhoto.image_url
+                    );
+                }
+
+                /* Save new About record */
+                const {
+                    error:databaseError
+                } = await supabaseClient
+                    .from("gallery_photos")
+                    .insert({
+                        file_name:"__about__",
+                        image_url:imageUrl
+                    });
+
+                if(databaseError){
+
+                    await supabaseClient
+                        .storage
+                        .from("gallery")
+                        .remove([storageFileName]);
+
+                    throw databaseError;
+                }
+
+                aboutAdminMessage.textContent =
+                    "About photo updated successfully.";
+
+                aboutFile.value = "";
+
+                await loadAboutPhoto();
+
+            }catch(error){
+
+                console.error(
+                    "About photo upload error:",
+                    error
+                );
+
+                aboutAdminMessage.textContent =
+                    "Unable to update About photo: " +
+                    error.message;
+
+            }finally{
+
+                uploadAboutBtn.disabled =
+                    false;
+            }
+        }
+    );
+}
+
+
+async function deleteAboutPhoto(
+    photoId,
+    encodedImageUrl
+){
+
+    if(!confirm("Delete the About page photo?"))
+        return;
+
+    aboutAdminMessage.textContent =
+        "Deleting About photo...";
+
+    try{
+
+        const imageUrl =
+            decodeURIComponent(encodedImageUrl);
+
+        await removeStorageImageFromUrl(
+            imageUrl
+        );
+
+        const {
+            error
+        } = await supabaseClient
+            .from("gallery_photos")
+            .delete()
+            .eq("id",photoId);
+
+        if(error)
+            throw error;
+
+        aboutAdminMessage.textContent =
+            "About photo deleted successfully.";
+
+        await loadAboutPhoto();
+
+    }catch(error){
+
+        console.error(
+            "About photo delete error:",
+            error
+        );
+
+        aboutAdminMessage.textContent =
+            "Unable to delete About photo: " +
+            error.message;
+    }
+}
+
+
+/* =========================================================
+   INITIAL LOAD
+========================================================= */
+
+slotDate.value =
+    getTodayDate();
+
+
+(async function(){
+
+    const isAdmin =
+        await checkAdmin();
+
+
+    if(!isAdmin)
+        return;
+
+
+    /*
+       FIRST:
+       Delete appointments older than 7 days.
+
+       THEN:
+       Load the remaining appointments.
+    */
+
+    await deleteAppointmentsOlderThan7Days();
+
+    await loadAppointments();
+
+    await loadSlots();
+
+    await loadAdminGallery();
+    await loadAboutPhoto();
+
+})();
+
+</script>
+
+</body>
+</html>
