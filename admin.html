@@ -1239,6 +1239,8 @@ async function checkAdmin(){
    LOAD APPOINTMENTS
 ========================================================= */
 
+const appointmentCache = {};
+
 async function loadAppointments(){
 
     appointmentTableBody.innerHTML = `
@@ -1334,6 +1336,20 @@ async function loadAppointments(){
         return;
 
     }
+
+
+    // Keep the latest appointment data in memory so WhatsApp
+    // can be opened directly from the button click, before
+    // any asynchronous Supabase operation takes place.
+    Object.keys(appointmentCache).forEach(
+        key => delete appointmentCache[key]
+    );
+
+    bookings.forEach(
+        booking => {
+            appointmentCache[String(booking.id)] = booking;
+        }
+    );
 
 
     updateStats(bookings);
@@ -2576,6 +2592,74 @@ async function changeSlotStatus(
 
 
 /* =========================================================
+   WHATSAPP HELPER
+========================================================= */
+
+function getWhatsAppNumber(phone){
+
+    let number = String(phone || "")
+        .replace(/\\D/g, "");
+
+    // Ammy Blendz is Canada-based.
+    // If a 10-digit Canadian number is stored,
+    // automatically add country code 1.
+    if(number.length === 10){
+        number = "1" + number;
+    }
+
+    return number;
+
+}
+
+
+function buildWhatsAppUrl(phone, message){
+
+    const number =
+        getWhatsAppNumber(phone);
+
+    if(!number)
+        return "";
+
+    return (
+        "https://wa.me/" +
+        number +
+        "?text=" +
+        encodeURIComponent(message)
+    );
+
+}
+
+
+function openWhatsAppMessage(phone, message){
+
+    const whatsappUrl =
+        buildWhatsAppUrl(
+            phone,
+            message
+        );
+
+    if(!whatsappUrl){
+
+        alert(
+            "Customer phone number is missing."
+        );
+
+        return null;
+
+    }
+
+    // This is called directly from the button click,
+    // before any await/Supabase operation, so Safari
+    // treats it as a user-initiated new-tab action.
+    return window.open(
+        whatsappUrl,
+        "_blank"
+    );
+
+}
+
+
+/* =========================================================
    CONFIRM BOOKING
 ========================================================= */
 
@@ -2590,6 +2674,49 @@ async function confirmBooking(
     ){
 
         return;
+
+    }
+
+    // Open WhatsApp immediately from the button click.
+    // This avoids Safari leaving an about:blank tab after
+    // the later asynchronous Supabase operations.
+    const cachedBooking =
+        appointmentCache[String(bookingId)];
+
+    let whatsappWindow = null;
+
+    if(cachedBooking){
+
+        const cachedServiceName =
+            getServiceName(
+                cachedBooking.service
+            );
+
+        const cachedDate =
+            cachedBooking.booking_date || "";
+
+        const cachedTime =
+            cachedBooking.start_time
+                ? cachedBooking.start_time.slice(0,5)
+                : "";
+
+        const cachedCustomerName =
+            cachedBooking.customer_name ||
+            "there";
+
+        const cachedMessage =
+            `Hi ${cachedCustomerName}!\n\n` +
+            `Great news! Your appointment at Ammy Blendz is confirmed.\n\n` +
+            `Service: ${cachedServiceName}\n` +
+            `Date: ${cachedDate}\n` +
+            `Time: ${cachedTime}\n\n` +
+            `We look forward to seeing you!`;
+
+        whatsappWindow =
+            openWhatsAppMessage(
+                cachedBooking.phone,
+                cachedMessage
+            );
 
     }
 
@@ -2618,6 +2745,9 @@ async function confirmBooking(
             bookingError
         );
 
+        if(whatsappWindow && !whatsappWindow.closed)
+            whatsappWindow.close();
+
         alert(
             "Unable to load booking."
         );
@@ -2631,6 +2761,9 @@ async function confirmBooking(
         booking.status !==
         "pending"
     ){
+
+        if(whatsappWindow && !whatsappWindow.closed)
+            whatsappWindow.close();
 
         alert(
             "This booking has already been processed."
@@ -2701,6 +2834,9 @@ async function confirmBooking(
             slotsError
         );
 
+        if(whatsappWindow && !whatsappWindow.closed)
+            whatsappWindow.close();
+
         alert(
             "Unable to load appointment slots."
         );
@@ -2770,6 +2906,9 @@ async function confirmBooking(
 
     if(!valid){
 
+        if(whatsappWindow && !whatsappWindow.closed)
+            whatsappWindow.close();
+
         alert(
             "The required time is no longer fully available for this service."
         );
@@ -2808,6 +2947,9 @@ async function confirmBooking(
             slotUpdateError
         );
 
+        if(whatsappWindow && !whatsappWindow.closed)
+            whatsappWindow.close();
+
         alert(
             "Unable to book the selected time slots."
         );
@@ -2842,6 +2984,9 @@ async function confirmBooking(
             updateError
         );
 
+        if(whatsappWindow && !whatsappWindow.closed)
+            whatsappWindow.close();
+
         alert(
             "Unable to confirm booking."
         );
@@ -2851,8 +2996,43 @@ async function confirmBooking(
     }
 
 
+    const customerName =
+        booking.customer_name ||
+        "there";
+
+    const appointmentDate =
+        booking.booking_date || "";
+
+    const appointmentTime =
+        booking.start_time
+            ? booking.start_time.slice(0,5)
+            : "";
+
+    const confirmationMessage =
+        `Hi ${customerName}!\n\n` +
+        `Great news! Your appointment at Ammy Blendz is confirmed.\n\n` +
+        `Service: ${serviceName}\n` +
+        `Date: ${appointmentDate}\n` +
+        `Time: ${appointmentTime}\n\n` +
+        `We look forward to seeing you!`;
+
+
+    if(
+        !whatsappWindow ||
+        whatsappWindow.closed
+    ){
+
+        whatsappWindow =
+            openWhatsAppMessage(
+                booking.phone,
+                confirmationMessage
+            );
+
+    }
+
+
     alert(
-        "Appointment confirmed and time slot booked!"
+        "Appointment confirmed. WhatsApp message is ready to send."
     );
 
 
@@ -2880,9 +3060,105 @@ async function rejectBooking(
 
     }
 
+    // Open WhatsApp immediately from the button click.
+    // This avoids Safari leaving an about:blank tab after
+    // the later asynchronous Supabase operation.
+    const cachedBooking =
+        appointmentCache[String(bookingId)];
+
+    let whatsappWindow = null;
+
+    if(cachedBooking){
+
+        const cachedCustomerName =
+            cachedBooking.customer_name ||
+            "there";
+
+        const cachedServiceName =
+            getServiceName(
+                cachedBooking.service
+            );
+
+        const cachedDate =
+            cachedBooking.booking_date || "";
+
+        const cachedTime =
+            cachedBooking.start_time
+                ? cachedBooking.start_time.slice(0,5)
+                : "";
+
+        const cachedMessage =
+            `Hi ${cachedCustomerName}!\n\n` +
+            `Thank you for choosing Ammy Blendz. Unfortunately, we can't accommodate your appointment request.\n\n` +
+            `Service: ${cachedServiceName}\n` +
+            `Date: ${cachedDate}\n` +
+            `Time: ${cachedTime}\n\n` +
+            `Please contact us to arrange another available time. We apologize for the inconvenience.`;
+
+        whatsappWindow =
+            openWhatsAppMessage(
+                cachedBooking.phone,
+                cachedMessage
+            );
+
+    }
+
 
     const {
-        error
+        data:booking,
+        error:bookingError
+    } =
+        await supabaseClient
+
+            .from("bookings")
+
+            .select("*")
+
+            .eq(
+                "id",
+                bookingId
+            )
+
+            .single();
+
+
+    if(bookingError){
+
+        console.error(
+            bookingError
+        );
+
+        if(whatsappWindow && !whatsappWindow.closed)
+            whatsappWindow.close();
+
+        alert(
+            "Unable to load booking."
+        );
+
+        return;
+
+    }
+
+
+    if(
+        booking.status !==
+        "pending"
+    ){
+
+        if(whatsappWindow && !whatsappWindow.closed)
+            whatsappWindow.close();
+
+        alert(
+            "This booking has already been processed."
+        );
+
+        return;
+
+    }
+
+
+    const {
+        error:updateError
     } =
         await supabaseClient
 
@@ -2900,9 +3176,14 @@ async function rejectBooking(
             );
 
 
-    if(error){
+    if(updateError){
 
-        console.error(error);
+        console.error(
+            updateError
+        );
+
+        if(whatsappWindow && !whatsappWindow.closed)
+            whatsappWindow.close();
 
         alert(
             "Unable to reject booking."
@@ -2913,8 +3194,48 @@ async function rejectBooking(
     }
 
 
+    const customerName =
+        booking.customer_name ||
+        "there";
+
+    const serviceName =
+        getServiceName(
+            booking.service
+        );
+
+    const appointmentDate =
+        booking.booking_date || "";
+
+    const appointmentTime =
+        booking.start_time
+            ? booking.start_time.slice(0,5)
+            : "";
+
+    const rejectionMessage =
+        `Hi ${customerName}!\n\n` +
+        `Thank you for choosing Ammy Blendz. Unfortunately, we can't accommodate your appointment request.\n\n` +
+        `Service: ${serviceName}\n` +
+        `Date: ${appointmentDate}\n` +
+        `Time: ${appointmentTime}\n\n` +
+        `Please contact us to arrange another available time. We apologize for the inconvenience.`;
+
+
+    if(
+        !whatsappWindow ||
+        whatsappWindow.closed
+    ){
+
+        whatsappWindow =
+            openWhatsAppMessage(
+                booking.phone,
+                rejectionMessage
+            );
+
+    }
+
+
     alert(
-        "Appointment rejected."
+        "Appointment rejected. WhatsApp message is ready to send."
     );
 
 
